@@ -1,0 +1,58 @@
+<ion-content [fullscreen]="true">
+ <ion-header>
+  <ion-toolbar color="primary">
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <div class="ion-text-center ion-padding-top">
+      <img src="assets/icon/favicon.png" style="width: 80px; height: auto;" />
+      <ion-card-header>
+        <ion-card-title>Daftar Akun</ion-card-title>
+        <ion-card-subtitle>Mulai berbagi keahlian hari ini</ion-card-subtitle>
+      </ion-card-header>
+    </div>
+
+    <ion-card-content>
+      <ion-list lines="inset">
+        <ion-item>
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          <ion-label position="floating">Nama Lengkap</ion-label>
+          <ion-input type="text" [(ngModel)]="userData.fullName"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" [(ngModel)]="userData.email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-label position="floating">Password</ion-label>
+          <ion-input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="userData.password"></ion-input>
+          <ion-button slot="end" fill="clear" (click)="togglePassword()">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </ion-button>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          <ion-label position="floating">Konfirmasi Password</ion-label>
+          <ion-input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="userData.confirmPassword"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" shape="round" class="ion-margin-top" (click)="register()">
+        Daftar Sekarang
+      </ion-button>
+
+      <div class="ion-text-center ion-margin-top">
+        <ion-note (click)="goToLogin()" style="cursor: pointer;">
+          Sudah punya akun? <ion-text color="primary"><b>Login</b></ion-text>
+        </ion-note>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

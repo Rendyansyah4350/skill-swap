@@ -1,0 +1,129 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Dashboard Skill-Swap</ion-title>
+  </ion-toolbar>
+
+  <ion-toolbar color="primary">
+    <ion-segment [(ngModel)]="segment" mode="ios">
+      <ion-segment-button value="chat">
+        <ion-label>Chat</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="request">
+        <ion-label>Request</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ng-container *ngIf="user$ | async as userData; else loading">
+    
+    <div class="welcome-section ion-margin-bottom">
+      <h1 style="font-weight: 800; font-size: 1.8rem; margin-bottom: 5px;">
+        Hi, {{ userData.fullName }}!
+      </h1>
+      <ion-note>Siap untuk berbagi ilmu hari ini?</ion-note>
+    </div>
+
+    <div *ngIf="segment === 'chat'">
+      <p class="ion-padding-start" style="font-weight: bold;">Obrolan Aktif:</p>
+      
+      <div *ngIf="(acceptedChats$ | async)?.length === 0" class="ion-text-center ion-padding">
+        <ion-icon name="chatbubble-ellipses-outline" style="font-size: 3rem; color: #ccc;"></ion-icon>
+        <p color="medium">Belum ada chat aktif.<br><small>Terima ajakan barter untuk mulai chat.</small></p>
+      </div>
+
+      <ion-list lines="full">
+        <ion-item *ngFor="let chat of acceptedChats$ | async" (click)="openChat(chat.partnerId, chat.partnerName)" button>
+          <ion-avatar slot="start">
+            <img [src]="'https://ui-avatars.com/api/?background=random&name=' + chat.partnerName" />
+          </ion-avatar>
+          <ion-label>
+            <h2 style="font-weight: bold;">{{ chat.partnerName }}</h2>
+            <p>Klik untuk lanjut diskusi...</p>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <div *ngIf="segment === 'request'">
+      
+      <p class="ion-padding-start" style="font-weight: bold; color: var(--ion-color-primary);">Permintaan Saya:</p>
+      <div *ngIf="(outgoingRequests$ | async)?.length === 0" class="ion-padding-start">
+        <p style="font-size: 0.9rem; color: gray;">Kamu belum mengirim permintaan.</p>
+      </div>
+
+      <ion-card *ngFor="let group of outgoingRequests$ | async" class="ion-margin-bottom">
+        <ion-item lines="none">
+          <ion-avatar slot="start" style="width: 30px; height: 30px;">
+            <img [src]="'https://ui-avatars.com/api/?name=' + group.partnerName" />
+          </ion-avatar>
+          <ion-label>
+            <h3 style="font-weight: bold;">Ke: {{ group.partnerName }}</h3>
+          </ion-label>
+        </ion-item>
+        <ion-card-content style="padding-top: 0;">
+          <div *ngFor="let s of group.skills" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+            <ion-badge [color]="s.status === 'pending' ? 'warning' : 'danger'" mode="ios">
+              {{ s.name }} ({{ s.status }})
+            </ion-badge>
+            <ion-button *ngIf="s.status === 'rejected'" fill="clear" color="medium" size="small" (click)="deleteRequest(s.id)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <hr style="opacity: 0.1; margin: 20px 0;">
+
+      <p class="ion-padding-start" style="font-weight: bold; color: var(--ion-color-success);">Permintaan Masuk:</p>
+      <div *ngIf="(incomingRequests$ | async)?.length === 0" class="ion-padding-start">
+        <p style="font-size: 0.9rem; color: gray;">Belum ada permintaan dari orang lain.</p>
+      </div>
+
+      <ion-card *ngFor="let group of incomingRequests$ | async" class="ion-margin-bottom">
+        <ion-item lines="full">
+          <ion-avatar slot="start">
+            <img [src]="'https://ui-avatars.com/api/?name=' + group.partnerName" />
+          </ion-avatar>
+          <ion-label>
+            <h2 style="font-weight: bold;">{{ group.partnerName }}</h2>
+            <p>Mengirim Permintaan</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-list lines="none">
+          <ion-item *ngFor="let s of group.skills">
+            <ion-label>
+              <h3 style="font-weight: 600;">{{ s.name }}</h3>
+              <p *ngIf="s.status === 'rejected'" color="danger">Ditolak</p>
+            </ion-label>
+            
+            <div slot="end" *ngIf="s.status === 'pending'">
+              <ion-button fill="clear" color="danger" (click)="updateStatus(s.id, 'rejected')">
+                <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+              <ion-button fill="solid" color="success" (click)="updateStatus(s.id, 'accepted')" style="--border-radius: 8px;">
+                <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+                Accept
+              </ion-button>
+            </div>
+
+            <ion-button slot="end" *ngIf="s.status === 'rejected'" fill="clear" color="medium" (click)="deleteRequest(s.id)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-card>
+
+    </div>
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="ion-text-center ion-padding" style="margin-top: 50px;">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Sinkronisasi data...</p>
+    </div>
+  </ng-template>
+</ion-content>

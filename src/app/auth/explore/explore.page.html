@@ -1,0 +1,77 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Eksplor Skill</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-searchbar
+      placeholder="Cari Skill atau Nama..."
+      (ionInput)="onSearchChange($event)"
+      debounce="500"
+      show-clear-button="always"
+    >
+    </ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="(searchTerm$ | async) as term">
+    <div *ngIf="term.length >= 2">
+      <ion-list-header><ion-label>Hasil Pencarian</ion-label></ion-list-header>
+      <ion-card
+        *ngFor="let user of searchResult$ | async"
+        (click)="goToDetail(user)"
+      >
+        <ion-item lines="none">
+          <ion-avatar slot="start">
+            <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName" />
+          </ion-avatar>
+          <ion-label>
+            <h2>{{ user.fullName }}</h2>
+            <p>{{ user.skillsOffered?.join(', ') || 'Belum ada skill' }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card>
+    </div>
+  </div>
+
+  <div *ngIf="!(searchTerm$ | async)">
+    
+    <div *ngIf="recentUsers.length > 0">
+      <ion-list-header>
+        <ion-label>Terakhir Dilihat</ion-label>
+        <ion-button fill="clear" size="small" color="danger" (click)="clearHistory()">
+          Hapus
+        </ion-button>
+      </ion-list-header>
+      
+      <div class="horizontal-scroll-container ion-padding-start">
+        <div class="history-item" *ngFor="let user of recentUsers" (click)="goToDetail(user)">
+          <ion-avatar>
+            <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName" />
+          </ion-avatar>
+          <small>{{ user.fullName.split(' ')[0] }}</small>
+        </div>
+      </div>
+    </div>
+
+    <ion-list-header>
+      <ion-label>Rekomendasi Partner</ion-label>
+    </ion-list-header>
+    
+    <ion-card
+      *ngFor="let user of recommendedUsers$ | async"
+      (click)="goToDetail(user)"
+    >
+      <ion-item lines="none">
+        <ion-avatar slot="start">
+          <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName" />
+        </ion-avatar>
+        <ion-label>
+          <h2 style="font-weight: bold">{{ user.fullName }}</h2>
+          <ion-note>{{ user.skillsOffered?.slice(0,2)?.join(', ') }}...</ion-note>
+        </ion-label>
+        <ion-button fill="clear" slot="end">Lihat</ion-button>
+      </ion-item>
+    </ion-card>
+  </div>
+</ion-content>

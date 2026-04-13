@@ -1,0 +1,62 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/explore" color="light"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Profil Partner</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ng-container *ngIf="user$ | async as user; else loading">
+    
+    <div class="ion-padding ion-text-center">
+      <ion-avatar style="width: 120px; height: 120px; margin: 20px auto">
+        <img
+          [src]="'https://ui-avatars.com/api/?name=' + user.fullName + '&size=200&background=random'"
+        />
+      </ion-avatar>
+
+      <h1 style="font-weight: bold">{{ user.fullName }}</h1>
+
+      <ion-divider class="ion-margin-vertical"></ion-divider>
+
+      <div class="ion-text-start">
+        <h3 style="font-weight: bold">Skill yang dikuasai:</h3>
+        <ion-chip color="secondary" *ngFor="let skill of user.skillsOffered">
+          <ion-label>{{ skill }}</ion-label>
+        </ion-chip>
+      </div>
+
+      <div class="ion-margin-top ion-text-start">
+        <h3 style="font-weight: bold">Tentang:</h3>
+        <p>
+          Halo! Saya ingin berbagi ilmu tentang skill yang saya punya. Mari kita
+          barter ilmu untuk berkembang bersama!
+        </p>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <ng-template #loading>
+    <div class="ion-text-center" style="margin-top: 50%;">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p color="medium">Memuat data profil...</p>
+    </div>
+  </ng-template>
+</ion-content>
+
+<ion-footer class="ion-no-border" *ngIf="user$ | async">
+  <ion-toolbar class="ion-padding">
+    <ion-button
+      expand="block"
+      shape="round"
+      color="primary"
+      (click)="sendSwapRequest()"
+    >
+      <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
+      Ajak Barter Skill
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

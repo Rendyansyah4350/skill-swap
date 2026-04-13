@@ -1,0 +1,65 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Profil Partner</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="profileData$ | async as user; else loading" class="ion-text-center">
+    
+    <div class="profile-header ion-padding-vertical">
+      <ion-avatar style="width: 110px; height: 110px; margin: 0 auto; border: 3px solid var(--ion-color-primary);">
+        <img [src]="'https://ui-avatars.com/api/?background=random&name=' + user.fullName" />
+      </ion-avatar>
+      <h2 style="font-weight: 800; font-size: 1.6rem; margin-top: 15px; margin-bottom: 5px;">{{ user.fullName }}</h2>
+      <p style="color: gray; font-style: italic; font-size: 0.95rem;">"{{ user.bio || 'Belum ada bio' }}"</p>
+    </div>
+
+    <ion-card style="text-align: left; border-radius: 15px; margin-top: 20px;" class="ion-no-margin">
+      <ion-card-header>
+        <ion-card-title style="font-size: 1.1rem; font-weight: bold;">Daftar Keahlian</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <ion-chip *ngFor="let s of user.processedSkills" 
+                    [color]="s.status === 'accepted' ? 'success' : (s.status === 'pending' ? 'warning' : (s.status === 'rejected' ? 'danger' : 'medium'))"
+                    mode="ios">
+            <ion-icon name="ribbon-outline" *ngIf="s.status === 'accepted'"></ion-icon>
+            <ion-icon name="hourglass-outline" *ngIf="s.status === 'pending'"></ion-icon>
+            <ion-icon name="close-circle-outline" *ngIf="s.status === 'rejected'"></ion-icon>
+            <ion-icon name="school-outline" *ngIf="s.status === 'none'"></ion-icon>
+
+            <ion-label style="font-weight: 600;">{{ s.name }}</ion-label>
+          </ion-chip>
+        </div>
+
+        <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+          <p style="font-size: 0.75rem; color: gray; margin: 0;">
+            <ion-badge color="success" mode="ios" style="font-size: 0.6rem;"> </ion-badge> Hijau: Skill sudah di-Accept
+          </p>
+          <p style="font-size: 0.75rem; color: gray; margin: 5px 0 0 0;">
+            <ion-badge color="warning" mode="ios" style="font-size: 0.6rem;"> </ion-badge> Kuning: Antrean pending
+          </p>
+          <p style="font-size: 0.75rem; color: gray; margin: 5px 0 0 0;">
+            <ion-badge color="danger" mode="ios" style="font-size: 0.6rem;"> </ion-badge> Merah: Skill ditolak
+          </p>
+          <p style="font-size: 0.75rem; color: gray; margin: 5px 0 0 0;">
+            <ion-badge color="medium" mode="ios" style="font-size: 0.6rem;"> </ion-badge> Abu-abu: Belum diajukan
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <ng-template #loading>
+    <div class="ion-text-center ion-padding" style="margin-top: 50px;">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Sinkronisasi data...</p>
+    </div>
+  </ng-template>
+</ion-content>

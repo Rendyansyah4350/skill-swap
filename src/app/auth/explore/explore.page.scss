@@ -1,0 +1,82 @@
+#container {
+  text-align: center;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#container strong {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+#container p {
+  font-size: 16px;
+  line-height: 22px;
+
+  color: #8c8c8c;
+
+  margin: 0;
+}
+
+#container a {
+  text-decoration: none;
+}
+
+
+
+.user-card {
+  margin-bottom: 15px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid #807b7b;
+}
+
+ion-chip {
+  margin: 2px;
+  font-size: 0.8rem;
+}
+
+.horizontal-scroll-container {
+  display: flex; // Membuat item berjejer ke samping
+  overflow-x: auto; // Mengaktifkan scroll horizontal
+  padding: 10px 16px;
+  gap: 15px; // Jarak antar item
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; // Agar scroll terasa ringan di HP
+
+  // Menyembunyikan scrollbar agar terlihat bersih (opsional)
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.history-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px; // Pastikan lebar item konsisten
+  text-align: center;
+
+  ion-avatar {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 5px;
+    border: 2px solid var(--ion-color-primary-tint);
+    padding: 2px;
+    background: white;
+  }
+
+  small {
+    font-weight: 500;
+    color: var(--ion-color-step-700);
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis; // Jika nama terlalu panjang, jadi titik-titik
+    white-space: nowrap;
+  }
+}
