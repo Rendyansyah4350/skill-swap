@@ -1,49 +1,59 @@
 <ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-title>Profil Saya</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()" color="light">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ng-container *ngIf="user$ | async as userData; else loading">
-    <div class="profile-header ion-text-center ion-padding">
-      <ion-avatar class="main-avatar" style="width: 100px; height: 100px; margin: 0 auto; border: 3px solid var(--ion-color-primary);">
-        <img [src]="'https://ui-avatars.com/api/?name=' + userData.fullName + '&size=128&background=random'" />
-      </ion-avatar>
-      <h2 style="font-weight: 800; margin-top: 15px; font-size: 1.5rem;">{{ userData.fullName }}</h2>
-      <p style="color: var(--ion-color-step-600);">{{ userData.email }}</p>
-    </div>
-
-    <ion-list-header style="margin-top: 10px;">
-      <ion-label style="font-weight: bold; font-size: 1.1rem;">Skill yang dimiliki: </ion-label>
-    </ion-list-header>
+  <ng-container *ngIf="user$ | async as user; else loading">
     
-    <div class="ion-padding-start ion-padding-end" style="display: flex; flex-wrap: wrap; gap: 5px;">
-      <ion-chip color="primary" mode="ios" *ngFor="let skill of userData.skillsOffered">
-        <ion-label>{{ skill }}</ion-label>
-      </ion-chip>
+    <div class="ion-text-center ion-padding-vertical">
+      <ion-avatar style="width: 110px; height: 110px; margin: 0 auto; border: 3px solid var(--ion-color-primary); padding: 3px;">
+        <img [src]="'https://ui-avatars.com/api/?background=random&name=' + user.fullName + '&size=200'" />
+      </ion-avatar>
       
-      <div *ngIf="!userData.skillsOffered?.length" class="ion-padding-vertical">
-        <ion-note color="medium">Belum ada skill yang ditambahkan.</ion-note>
-      </div>
+      <h2 style="font-weight: 800; margin-top: 15px; margin-bottom: 5px;">{{ user.fullName }}</h2>
+      
+      <p style="color: #666; font-style: italic; font-size: 0.95rem; margin: 0 20px 15px 20px;">
+        "{{ user.bio || 'Belum ada bio. Tambahkan bio agar partner barter mengenalmu!' }}"
+      </p>
+
+      <ion-button (click)="editProfile(user)" fill="outline" shape="round" size="small">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        Edit ProfilSS
+      </ion-button>
     </div>
 
-    <ion-list class="ion-margin-top" lines="full">
-      <ion-item button detail="true" (click)="editProfile(userData)">
-        <ion-icon name="create-outline" slot="start" color="primary"></ion-icon>
-        <ion-label>Edit Profile & Skill</ion-label>
-      </ion-item>
-      
-      <ion-item button detail="false" (click)="logout()" color="danger">
-        <ion-icon name="log-out-outline" slot="start"></ion-icon>
-        <ion-label style="font-weight: 500;">Keluar Aplikasi</ion-label>
-      </ion-item>
-    </ion-list>
+    <div style="height: 1px; background: #e0e0e0; margin: 20px 0;"></div>
+
+    <ion-card class="ion-no-margin" style="border-radius: 15px; box-shadow: none; border: 1px solid #eee;">
+      <ion-card-header>
+        <ion-card-title style="font-size: 1rem; font-weight: bold;">Skill yang Saya Tawarkan</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <ion-chip color="primary" mode="ios" *ngFor="let skill of user.skillsOffered">
+            <ion-icon name="ribbon-outline"></ion-icon>
+            <ion-label style="font-weight: 600;">{{ skill }}</ion-label>
+          </ion-chip>
+          
+          <p *ngIf="!user.skillsOffered || user.skillsOffered.length === 0" style="color: gray;">
+            Belum ada skill yang ditambahkan.
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
   </ng-container>
 
   <ng-template #loading>
-    <div class="ion-text-center ion-padding">
-      <ion-spinner name="crescent"></ion-spinner>
+    <div class="ion-text-center" style="margin-top: 50px;">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
       <p>Memuat profil...</p>
     </div>
   </ng-template>

@@ -66,3 +66,51 @@ ion-footer {
   }
 }
 
+.message-wrapper {
+  display: flex;
+  margin-bottom: 10px;
+  
+  &.sent {
+    justify-content: flex-end;
+    .message-bubble {
+      background: #a0a0a3; // Warna hijau kalem ala WA
+      border-radius: 12px 12px 0 12px;
+    }
+  }
+
+  &.received {
+    justify-content: flex-start;
+    .message-bubble {
+      background: #ffffff;
+      border: 1px solid #eee;
+      border-radius: 12px 12px 12px 0;
+    }
+  }
+}
+
+.message-bubble {
+  max-width: 80%;
+  padding: 8px 12px;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+
+  .message-text {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 2px;
+  }
+
+  .message-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    font-size: 0.65rem;
+    color: #fafafa;
+
+    ion-icon {
+      font-size: 0.9rem;
+      // Warna secondary biasanya biru di Ionic, cocok buat 'isRead'
+    }
+  }
+}

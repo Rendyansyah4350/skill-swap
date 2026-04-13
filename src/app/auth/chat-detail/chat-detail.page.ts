@@ -1,8 +1,9 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router'; // Tambah Router
-import { Firestore, collection, addDoc, query, where, orderBy, collectionData, serverTimestamp } from '@angular/fire/firestore';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Firestore, collection, addDoc, query, orderBy, collectionData, serverTimestamp, doc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged, Unsubscribe } from '@angular/fire/auth';
 import { Observable, of, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators'; // Tambahkan ini
 import { IonContent } from '@ionic/angular';
 
 @Component({
@@ -26,31 +27,27 @@ export class ChatDetailPage implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router, // Inject Router untuk pindah ke profil
+    private router: Router,
     private firestore: Firestore,
     private auth: Auth
   ) {}
 
   ngOnInit() {
-    // 1. Ambil data dari parameter URL
     this.route.queryParams.subscribe(params => {
       this.partnerId = params['id'];
       this.partnerName = params['name'];
 
-      // 2. Monitor Auth State
       this.authUnsubscribe = onAuthStateChanged(this.auth, (user) => {
         if (user) {
           this.currentUserId = user.uid;
           this.setupChat();
         } else {
-          console.error("User tidak terdeteksi.");
           this.router.navigate(['/login']);
         }
       });
     });
   }
 
-  // FITUR BARU: Pindah ke halaman profil partner
   goToPartnerProfile() {
     if (this.partnerId) {
       this.router.navigate(['/profile-view'], { 
@@ -60,12 +57,8 @@ export class ChatDetailPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.authUnsubscribe) {
-      this.authUnsubscribe();
-    }
-    if (this.msgSubscription) {
-      this.msgSubscription.unsubscribe();
-    }
+    if (this.authUnsubscribe) this.authUnsubscribe();
+    if (this.msgSubscription) this.msgSubscription.unsubscribe();
   }
 
   setupChat() {
@@ -77,14 +70,23 @@ export class ChatDetailPage implements OnInit, OnDestroy {
   }
 
   loadMessages() {
-    const msgCollection = collection(this.firestore, 'messages');
-    const q = query(
-      msgCollection,
-      where('chatId', '==', this.chatId),
-      orderBy('createdAt', 'asc')
-    );
+    // Sesuaikan path dengan fungsi sendMessage (chats/ID/messages)
+    const msgCollection = collection(this.firestore, `chats/${this.chatId}/messages`);
+    const q = query(msgCollection, orderBy('timestamp', 'asc'));
     
-    this.messages$ = collectionData(q, { idField: 'id' });
+    // Tambahkan idField: 'id' agar bisa update isRead
+    this.messages$ = collectionData(q, { idField: 'id' }).pipe(
+      map(messages => {
+        messages.forEach(async (msg: any) => {
+          // LOGIC: Jika pesan dari partner & belum dibaca, tandai as READ
+          if (msg.senderId !== this.currentUserId && !msg.isRead) {
+            const msgRef = doc(this.firestore, `chats/${this.chatId}/messages/${msg.id}`);
+            await updateDoc(msgRef, { isRead: true });
+          }
+        });
+        return messages;
+      })
+    );
 
     if (this.msgSubscription) this.msgSubscription.unsubscribe();
     this.msgSubscription = this.messages$.subscribe(() => {
@@ -94,17 +96,18 @@ export class ChatDetailPage implements OnInit, OnDestroy {
 
   async sendMessage() {
     if (!this.newMessage.trim()) return;
-
-    const textToSend = this.newMessage;
-    this.newMessage = ''; 
-
+  
     try {
-      await addDoc(collection(this.firestore, 'messages'), {
-        chatId: this.chatId,
+      const msgCollection = collection(this.firestore, `chats/${this.chatId}/messages`);
+    
+      await addDoc(msgCollection, {
+        text: this.newMessage,
         senderId: this.currentUserId,
-        text: textToSend,
-        createdAt: serverTimestamp()
+        timestamp: serverTimestamp(),
+        isRead: false // Pengirim set default false
       });
+    
+      this.newMessage = ''; 
       this.scrollToBottom();
     } catch (error) {
       console.error("Gagal kirim pesan:", error);

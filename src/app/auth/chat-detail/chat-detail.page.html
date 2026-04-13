@@ -1,34 +1,54 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/home"></ion-back-button>
     </ion-buttons>
-    <ion-title (click)="goToPartnerProfile()">{{ partnerName }}</ion-title>
+    <ion-title (click)="goToPartnerProfile()" style="cursor: pointer;">
+      {{ partnerName }}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding chat-content">
   <div *ngIf="messages$ | async as msgs; else noMsgs">
     <div *ngFor="let msg of msgs" 
          [class]="msg.senderId === currentUserId ? 'message-wrapper sent' : 'message-wrapper received'">
+      
       <div class="message-bubble">
-        {{ msg.text }}
+        <div class="message-text">{{ msg.text }}</div>
+        
+        <div class="message-info">
+          <span class="time">
+            {{ msg.timestamp?.toDate() | date:'HH:mm' }}
+          </span>
+
+          <ion-icon 
+            *ngIf="msg.senderId === currentUserId"
+            [name]="msg.isRead ? 'checkmark-done' : 'checkmark-outline'" 
+            [color]="msg.isRead ? 'secondary' : 'medium'">
+          </ion-icon>
+        </div>
       </div>
+
     </div>
   </div>
 
   <ng-template #noMsgs>
-    <div class="ion-text-center ion-padding">
+    <div class="ion-text-center ion-padding" style="margin-top: 50px;">
       <ion-note>Belum ada pesan. Mulai obrolan yuk!</ion-note>
     </div>
   </ng-template>
 </ion-content>
 
-<ion-footer>
+<ion-footer class="ion-no-border">
   <ion-toolbar color="light">
     <ion-item lines="none" color="light">
-      <ion-input [(ngModel)]="newMessage" placeholder="Ketik pesan..." (keyup.enter)="sendMessage()"></ion-input>
-      <ion-button slot="end" fill="clear" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+      <ion-input [(ngModel)]="newMessage" 
+                 placeholder="Ketik pesan..." 
+                 (keyup.enter)="sendMessage()"
+                 class="custom-input">
+      </ion-input>
+      <ion-button slot="end" fill="clear" (click)="sendMessage()" [disabled]="!newMessage || !newMessage.trim()">
         <ion-icon name="send" color="primary"></ion-icon>
       </ion-button>
     </ion-item>

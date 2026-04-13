@@ -45,6 +45,12 @@ export class ProfilePage implements OnInit {
           value: currentData.fullName
         },
         {
+          name: 'bio', // Input Baru untuk Bio
+          type: 'textarea',
+          placeholder: 'Tulis bio singkatmu...',
+          value: currentData.bio || ''
+        },
+        {
           name: 'skills',
           type: 'textarea',
           placeholder: 'Skill (Pisahkan dengan koma atau spasi)',
@@ -56,7 +62,8 @@ export class ProfilePage implements OnInit {
         {
           text: 'Simpan',
           handler: (data) => {
-            this.saveData(data.fullName, data.skills);
+            // Sekarang mengirim 3 parameter: Nama, Bio, dan Skills
+            this.saveData(data.fullName, data.bio, data.skills);
           }
         }
       ]
@@ -64,7 +71,7 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
-  async saveData(newName: string, skillString: string) {
+  async saveData(newName: string, newBio: string, skillString: string) {
     if (!newName.trim()) {
       this.showToast('Nama tidak boleh kosong!', 'warning');
       return;
@@ -81,12 +88,11 @@ export class ProfilePage implements OnInit {
       if (user) {
         const userDocRef = doc(this.firestore, `users/${user.uid}`);
         
-        // 1. Pecah berdasarkan Koma ATAU Spasi menggunakan Regex
+        // 1. Logika pemrosesan skill
         const rawSkills = skillString
           ? skillString.split(/[ ,]+/).map(s => s.trim()).filter(s => s !== "")
           : [];
 
-        // 2. Logika Anti-Duplikat (Case Insensitive)
         const uniqueSkills: string[] = [];
         const seen = new Set();
 
@@ -94,13 +100,14 @@ export class ProfilePage implements OnInit {
           const lowerSkill = skill.toLowerCase();
           if (!seen.has(lowerSkill)) {
             seen.add(lowerSkill);
-            uniqueSkills.push(skill); // Simpan format tulisan asli user
+            uniqueSkills.push(skill);
           }
         }
 
-        // 3. Update ke Firestore
+        // 2. Update Firestore dengan field BIO
         await updateDoc(userDocRef, {
           fullName: newName,
+          bio: newBio, // Simpan Bio ke Firestore
           skillsOffered: uniqueSkills
         });
 
