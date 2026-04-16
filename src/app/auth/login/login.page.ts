@@ -2,7 +2,6 @@
 import { Component } from '@angular/core';
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-// Import AlertController dan LoadingController
 import { AlertController, LoadingController } from '@ionic/angular';
 
 @Component({
@@ -31,6 +30,10 @@ export class LoginPage {
 
   togglePassword() {
     this.showPassword = !this.showPassword;
+  }
+
+  goToForgot() {
+    this.router.navigate(['/forgot-password']);
   }
 
   // Fungsi pembantu untuk memunculkan Popup Alert
@@ -70,8 +73,8 @@ export class LoginPage {
       // Hilangkan loading setelah berhasil
       await loading.dismiss();
       
-      // Langsung arahkan ke home
-      this.router.navigate(['/tabs/home']); 
+      // MODIFIKASI: Gunakan replaceUrl: true agar tidak bisa 'Back' ke Login
+      this.router.navigate(['/tabs/home'], { replaceUrl: true }); 
       
     } catch (error: any) {
       // Hilangkan loading jika gagal

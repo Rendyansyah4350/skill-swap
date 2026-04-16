@@ -80,3 +80,126 @@ ion-chip {
     white-space: nowrap;
   }
 }
+
+// Searchbar Styling
+.search-toolbar {
+  --padding-top: 0;
+  --padding-bottom: 15px;
+  
+  .custom-searchbar {
+    --background: #ffffff;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+// Global Labels
+.main-label {
+  font-weight: 800 !important;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+// Horizontal Scroll History
+.history-section {
+  margin-bottom: 10px;
+}
+
+.horizontal-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 16px;
+  gap: 20px;
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar { display: none; } // Sembunyikan scrollbar
+
+  .history-item {
+    text-align: center;
+    flex: 0 0 auto;
+
+    .avatar-wrapper {
+      width: 65px;
+      height: 65px;
+      border-radius: 22px; // Squircle style
+      overflow: hidden;
+      border: 2px solid #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 6px;
+      
+      img { width: 100%; height: 100%; object-fit: cover; }
+    }
+
+    p {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #444;
+      margin: 0;
+    }
+  }
+}
+
+// User Card Styling
+.user-card {
+  margin: 10px 16px;
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f2f2f2;
+  transition: 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  ion-item {
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+  }
+
+  .large-avatar {
+    width: 55px;
+    height: 55px;
+    margin-right: 15px;
+  }
+
+  h2 {
+    font-weight: 700 !important;
+    font-size: 1.1rem;
+    color: #222;
+  }
+
+  // Tags untuk skill
+  .badge-skill {
+    display: inline-block;
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    color: var(--ion-color-primary);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 5px;
+    margin-top: 5px;
+  }
+
+  .skills-preview {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 4px;
+    
+    ion-icon { color: var(--ion-color-primary); }
+  }
+
+  .btn-view {
+    --border-radius: 8px;
+    --box-shadow: none;
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+}

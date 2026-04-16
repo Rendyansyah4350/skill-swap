@@ -1,11 +1,23 @@
 <ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/home" color="light"></ion-back-button>
     </ion-buttons>
-    <ion-title (click)="goToPartnerProfile()" style="cursor: pointer">
-      {{ partnerName }}
-    </ion-title>
+    
+    <div (click)="goToPartnerProfile()" style="display: flex; align-items: center; gap: 10px; cursor: pointer">
+        <ion-avatar style="width: 32px; height: 32px;">
+          <img [src]="'https://ui-avatars.com/api/?' + (isPartnerActive ? '' : 'background=cccccc&') + 'color=fff&name=' + partnerName" />
+        </ion-avatar>
+      <ion-title style="padding: 0; font-weight: 700; font-size: 1.1rem; color: white;">
+        {{ partnerName }}
+      </ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="presentActionSheet()">
+        <ion-icon name="ellipsis-vertical" slot="icon-only" color="light"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -15,7 +27,7 @@
       *ngFor="let msg of msgs"
       [class]="msg.senderId === currentUserId ? 'message-wrapper sent' : 'message-wrapper received'"
     >
-      <div class="message-bubble">
+      <div class="message-bubble" (click)="presentDeleteOptions(msg)">
         <div class="message-text">{{ msg.text }}</div>
 
         <div class="message-info">
@@ -26,7 +38,7 @@
           <ion-icon
             *ngIf="msg.senderId === currentUserId"
             [name]="msg.isRead ? 'checkmark-done' : 'checkmark-outline'"
-            [color]="msg.isRead ? 'success' : 'medium'"
+            [color]="msg.isRead ? 'secondary' : 'medium'"
           >
           </ion-icon>
         </div>
@@ -43,7 +55,7 @@
 
 <ion-footer class="ion-no-border">
   <ion-toolbar color="light">
-    <ion-item lines="none" color="light">
+    <ion-item lines="none" color="light" *ngIf="isPartnerActive; else accountDeleted">
       <ion-input
         [(ngModel)]="newMessage"
         placeholder="Ketik pesan..."
@@ -60,5 +72,16 @@
         <ion-icon name="send" color="primary"></ion-icon>
       </ion-button>
     </ion-item>
+
+    <ng-template #accountDeleted>
+      <div class="ion-text-center ion-padding" style="width: 100%;">
+        <ion-text color="danger">
+          <p style="font-weight: 600; font-size: 0.9rem; margin: 0;">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            Akun partner sudah tidak aktif.
+          </p>
+        </ion-text>
+      </div>
+    </ng-template>
   </ion-toolbar>
 </ion-footer>

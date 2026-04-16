@@ -8,55 +8,109 @@
 </ion-header>
 
 <ion-content>
+  <div class="header-bg"></div>
+
   <ng-container *ngIf="user$ | async as user; else loading">
-    
-    <div class="ion-padding ion-text-center">
-      <ion-avatar style="width: 120px; height: 120px; margin: 20px auto">
-        <img
-          [src]="'https://ui-avatars.com/api/?name=' + user.fullName + '&size=200&background=random'"
-        />
+    <div class="ion-padding ion-text-center profile-content">
+      <ion-avatar class="main-avatar">
+        <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName + '&size=200&color=fff'" />
       </ion-avatar>
 
-      <h1 style="font-weight: bold">{{ user.fullName }}</h1>
-
-      <ion-divider class="ion-margin-vertical"></ion-divider>
-
-      <div class="ion-text-start">
-        <h3 style="font-weight: bold">Skill yang dikuasai:</h3>
-        <ion-chip color="secondary" *ngFor="let skill of user.skillsOffered">
-          <ion-label>{{ skill }}</ion-label>
-        </ion-chip>
+      <h1 class="user-name">{{ user.fullName }}</h1>
+      
+      <div class="rating-badge">
+        <ion-icon name="star" color="warning"></ion-icon>
+        <span class="avg">{{ averageRating || '0.0' }}</span>
+        <span class="total">({{ totalReviews }} Ulasan)</span>
       </div>
 
-      <div class="ion-margin-top ion-text-start">
-        <h3 style="font-weight: bold">Tentang:</h3>
-        <p>
-          Halo! Saya ingin berbagi ilmu tentang skill yang saya punya. Mari kita
-          barter ilmu untuk berkembang bersama!
+      <div class="divider"></div>
+
+      <div class="ion-text-start section">
+        <h3>Skill yang dikuasai:</h3>
+        <div class="chips-grid">
+          <ion-chip color="secondary" *ngFor="let skill of user.skillsOffered">
+            <ion-label>{{ skill }}</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+
+      <div class="ion-margin-top ion-text-start section">
+        <h3>Tentang:</h3>
+        <p class="bio-text">
+          {{ user.bio || 'Halo! Saya ingin berbagi ilmu tentang skill yang saya punya. Mari kita barter ilmu untuk berkembang bersama!' }}
         </p>
       </div>
+
+      <div class="ion-margin-top ion-text-start section">
+        <h3>Ulasan Pengguna:</h3>
+        <div *ngIf="(reviews$ | async)?.length === 0" class="empty-reviews">
+          Belum ada ulasan untuk user ini.
+        </div>
+        
+        <ion-card *ngFor="let r of reviews$ | async" class="review-card">
+          <ion-item lines="none">
+            <ion-label>
+              <div class="review-header">
+                <span class="stars">⭐ {{ r.rating }}</span>
+                <span class="date">{{ r.timestamp?.toDate() | date:'dd MMM yyyy' }}</span>
+              </div>
+              <p class="comment">"{{ r.comment }}"</p>
+            </ion-label>
+          </ion-item>
+        </ion-card>
+      </div>
     </div>
+
+    <ion-modal [isOpen]="isSwapModalOpen" (didDismiss)="isSwapModalOpen = false" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.75]">
+      <ng-template>
+        <ion-header class="ion-no-border">
+          <ion-toolbar>
+            <ion-title>Pilih Skill</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="isSwapModalOpen = false" color="medium">Batal</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <p class="ion-margin-bottom">Pilih skill yang ingin kamu pelajari dari <b>{{ user.fullName }}</b>:</p>
+          
+          <ion-list lines="none" class="skill-select-list">
+            <ion-item *ngFor="let skill of user.skillsOffered" class="skill-item">
+              <ion-checkbox slot="start" [(ngModel)]="selectedSkillsMap[skill]"></ion-checkbox>
+              <ion-label>{{ skill }}</ion-label>
+            </ion-item>
+          </ion-list>
+
+          <ion-button expand="block" shape="round" class="btn-send" (click)="confirmSwapRequest()">
+            Kirim Ajakan Barter
+          </ion-button>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
 
   </ng-container>
 
   <ng-template #loading>
-    <div class="ion-text-center" style="margin-top: 50%;">
+    <div class="sync-loader">
       <ion-spinner name="crescent" color="primary"></ion-spinner>
-      <p color="medium">Memuat data profil...</p>
+      <p>Memuat data profil...</p>
     </div>
   </ng-template>
 </ion-content>
 
 <ion-footer class="ion-no-border" *ngIf="user$ | async">
-  <ion-toolbar class="ion-padding">
-    <ion-button
-      expand="block"
-      shape="round"
-      color="primary"
-      (click)="sendSwapRequest()"
-    >
+  <ion-toolbar>
+    <ion-button *ngIf="!isBlockedMe" expand="block" shape="round" color="primary" class="main-btn btn-barter" (click)="openSwapModal()">
       <ion-icon name="chatbubbles-outline" slot="start"></ion-icon>
       Ajak Barter Skill
     </ion-button>
+
+    <div *ngIf="isBlockedMe" class="ion-padding-horizontal">
+      <ion-badge color="danger" style="width: 100%; padding: 12px; border-radius: 10px;">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        Akses interaksi dibatasi oleh pengguna ini
+      </ion-badge>
+    </div>
   </ion-toolbar>
 </ion-footer>

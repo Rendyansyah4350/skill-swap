@@ -26,3 +26,141 @@
   text-decoration: none;
 }
 
+// Background Content
+ion-content {
+  --background: #f8f9fa; // Samakan dengan register
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px; // Sisi berbeda dengan register biar variatif tapi tetap 1 tema
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    z-index: 0;
+  }
+}
+
+// Container Center (Biar card pas di tengah kalau layar gede)
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+}
+
+// Card Login
+.auth-card {
+  margin: 10px;
+  border-radius: 24px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+  border: none;
+  background: #ffffff;
+}
+
+// Logo Styling
+.logo-wrapper {
+  margin-top: 25px;
+  img {
+    filter: drop-shadow(0 4px 10px rgba(var(--ion-color-primary-rgb), 0.2));
+  }
+}
+
+// Typography
+ion-card-title {
+  font-weight: 800 !important;
+  font-size: 1.8rem !important;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+ion-card-subtitle {
+  font-size: 1rem;
+  color: #8e8e93;
+  margin-top: 4px;
+}
+
+// Input List
+ion-list {
+  background: transparent !important;
+  padding: 0 5px;
+
+  ion-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 10px;
+    --highlight-color-focused: var(--ion-color-primary);
+
+    ion-icon {
+      color: #adb5bd;
+      font-size: 1.3rem;
+      margin-right: 12px;
+      margin-top: 15px;
+    }
+
+    ion-label {
+      color: #6c757d !important;
+      font-weight: 500;
+    }
+
+    ion-input {
+      font-weight: 600;
+      color: #2d3436;
+    }
+    
+    // Tombol mata (show/hide password)
+    ion-button {
+      --color: #adb5bd;
+      margin-top: 15px;
+    }
+  }
+}
+
+// Button Login
+ion-button[expand="block"] {
+  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, #6366f1 100%);
+  --border-radius: 16px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-top: 25px;
+  box-shadow: 0 10px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+  --box-shadow: none;
+
+  &:active {
+    transform: scale(0.97);
+    transition: 0.1s;
+  }
+}
+
+// Link Lupa Password
+ion-text[color="primary"] {
+  transition: 0.2s;
+  &:active {
+    opacity: 0.6;
+  }
+}
+
+// Link Daftar di bawah
+ion-note {
+  font-size: 0.95rem;
+  color: #6c757d;
+  
+  ion-text {
+    font-weight: 700;
+  }
+}
+
+// Toolbar Sync
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+  --border-width: 0;
+  
+  ion-title {
+    font-weight: 700;
+  }
+}

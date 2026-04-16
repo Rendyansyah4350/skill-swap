@@ -40,3 +40,122 @@ ion-note {
   display: block;
   padding: 10px;
 }
+
+// Background Content
+ion-content {
+  --background: #f8f9fa; // Abu-abu sangat muda biar card-nya "pop up"
+
+  // Efek Dekorasi Lingkaran di Background (Opsional tapi keren)
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    z-index: 0;
+  }
+}
+
+// Card Utama
+ion-card {
+  margin: 20px 10px;
+  border-radius: 24px; // Lebih melengkung biar modern
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06); // Shadow halus
+  border: none;
+  background: #ffffff;
+}
+
+// Logo Wrapper
+.ion-text-center {
+  img {
+    margin-top: 20px;
+    filter: drop-shadow(0 4px 10px rgba(var(--ion-color-primary-rgb), 0.2));
+  }
+}
+
+
+ion-card-subtitle {
+  font-size: 0.95rem;
+  color: #8e8e93;
+  margin-top: 5px;
+}
+
+// Styling Input Item
+ion-list {
+  background: transparent !important;
+  padding: 0 10px;
+
+  ion-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 12px;
+    --highlight-color-focused: var(--ion-color-primary);
+
+    ion-icon {
+      color: #adb5bd;
+      font-size: 1.4rem;
+      margin-right: 12px;
+      margin-top: 15px; // Penyesuaian karena label floating
+    }
+
+    ion-label {
+      color: #6c757d !important;
+      font-weight: 500;
+    }
+
+    ion-input {
+      font-weight: 600;
+      color: #2d3436;
+    }
+  }
+}
+
+// Tombol Daftar
+ion-button[expand="block"] {
+  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, #6366f1 100%);
+  --border-radius: 16px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-top: 30px;
+  box-shadow: 0 10px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+  --box-shadow: none; // Hapus shadow default ionic
+  
+  &:active {
+    transform: scale(0.98); // Efek membal saat ditekan
+    transition: 0.1s;
+  }
+}
+
+// Link Login di Bawah
+ion-note {
+  display: inline-block;
+  margin-top: 15px;
+  font-size: 0.95rem;
+  color: #6c757d;
+  
+  ion-text {
+    font-weight: 700;
+    transition: 0.2s;
+    
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+}
+
+// Fix Header Toolbar agar sinkron
+ion-toolbar {
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+  --border-width: 0;
+  
+  ion-title {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+}

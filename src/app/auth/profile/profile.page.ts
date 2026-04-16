@@ -1,9 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { Auth, signOut, onAuthStateChanged } from '@angular/fire/auth';
-import { Firestore, doc, docData, updateDoc } from '@angular/fire/firestore';
+import { Auth, signOut, onAuthStateChanged, deleteUser } from '@angular/fire/auth';
+import { 
+  Firestore, 
+  doc, 
+  docData, 
+  updateDoc, 
+  collection, 
+  query, 
+  where, 
+  collectionData, 
+  deleteDoc, 
+  getDoc, 
+  orderBy 
+} from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ToastController } from '@ionic/angular';
-import { Observable, of } from 'rxjs';
+import { Observable, of, from } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile',
@@ -13,6 +26,23 @@ import { Observable, of } from 'rxjs';
 })
 export class ProfilePage implements OnInit {
   user$: Observable<any> = of(null);
+
+  // Variabel Edit Profil
+  isModalOpen = false;
+  tempData = {
+    fullName: '',
+    bio: '',
+    skills: ''
+  };
+
+  // --- VARIABEL DAFTAR BLOKIR ---
+  isBlockModalOpen = false;
+  blockedUsers$: Observable<any[]> = of([]);
+
+  // --- VARIABEL RATING SAYA ---
+  myReviews$: Observable<any[]> = of([]);
+  averageRating: string = '0.0';
+  totalReviews: number = 0;
 
   constructor(
     private auth: Auth,
@@ -28,47 +58,164 @@ export class ProfilePage implements OnInit {
       if (user) {
         const userDocRef = doc(this.firestore, `users/${user.uid}`);
         this.user$ = docData(userDocRef);
+
+        // Ambil Rating Milik Saya sendiri
+        this.loadMyRatings(user.uid);
       } else {
         this.router.navigate(['/login'], { replaceUrl: true });
       }
     });
   }
 
-  async editProfile(currentData: any) {
+  // --- LOGIC HAPUS AKUN ---
+  async confirmDeleteAccount() {
     const alert = await this.alertCtrl.create({
-      header: 'Edit Profil & Skill',
-      inputs: [
-        {
-          name: 'fullName',
-          type: 'text',
-          placeholder: 'Nama Lengkap',
-          value: currentData.fullName
+      header: 'Hapus Akun Permanen?',
+      message: 'Semua profil, skill, dan data login Anda akan dihapus selamanya.',
+      cssClass: 'danger-alert',
+      buttons: [
+        { 
+          text: 'BATAL', 
+          role: 'cancel',
+          cssClass: 'alert-button-cancel' 
         },
         {
-          name: 'bio', // Input Baru untuk Bio
-          type: 'textarea',
-          placeholder: 'Tulis bio singkatmu...',
-          value: currentData.bio || ''
-        },
-        {
-          name: 'skills',
-          type: 'textarea',
-          placeholder: 'Skill (Pisahkan dengan koma atau spasi)',
-          value: currentData.skillsOffered ? currentData.skillsOffered.join(', ') : ''
+          text: 'YA, HAPUS',
+          role: 'destructive',
+          cssClass: 'alert-button-confirm',
+          handler: () => this.executeDeleteAccount()
         }
-      ],
+      ]
+    });
+    await alert.present();
+  }
+
+  async executeDeleteAccount() {
+    const loading = await this.loadingCtrl.create({
+      message: 'Menghapus data Anda...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    try {
+      const user = this.auth.currentUser;
+      if (user) {
+        // 1. Hapus dokumen di Firestore (PENTING: Harus dilakukan sebelum hapus Auth)
+        const userDocRef = doc(this.firestore, `users/${user.uid}`);
+        await deleteDoc(userDocRef);
+
+        // 2. Hapus user dari Firebase Authentication
+        await deleteUser(user);
+
+        await loading.dismiss();
+        this.showToast('Akun berhasil dihapus.', 'success');
+        this.router.navigate(['/login'], { replaceUrl: true });
+      } else {
+        await loading.dismiss();
+      }
+    } catch (error: any) {
+      await loading.dismiss();
+      console.error('Error delete account:', error);
+
+      if (error.code === 'auth/requires-recent-login') {
+        const alert = await this.alertCtrl.create({
+          header: 'Verifikasi Ulang',
+          message: 'Silakan Logout dan Login kembali untuk menghapus akun demi keamanan.',
+          buttons: ['OK']
+        });
+        await alert.present();
+      } else {
+        this.showToast('Gagal menghapus akun.', 'danger');
+      }
+    }
+  }
+
+  // --- LOGIC AMBIL RATING SAYA ---
+  loadMyRatings(uid: string) {
+    const ratingCol = collection(this.firestore, 'ratings');
+    const q = query(ratingCol, where('toUid', '==', uid), orderBy('timestamp', 'desc'));
+
+    this.myReviews$ = collectionData(q).pipe(
+      map(reviews => {
+        if (reviews && reviews.length > 0) {
+          const sum = reviews.reduce((acc, cur: any) => acc + Number(cur['rating']), 0);
+          this.averageRating = (sum / reviews.length).toFixed(1);
+          this.totalReviews = reviews.length;
+        } else {
+          this.averageRating = '0.0';
+          this.totalReviews = 0;
+        }
+        return reviews;
+      })
+    );
+  }
+
+  // --- LOGIC DAFTAR BLOKIR ---
+  openBlockedList() {
+    this.isBlockModalOpen = true;
+    this.loadBlockedUsers();
+  }
+
+  loadBlockedUsers() {
+    const user = this.auth.currentUser;
+    if (!user) return;
+
+    const blockCol = collection(this.firestore, 'blocks');
+    const q = query(blockCol, where('blockerUid', '==', user.uid));
+
+    this.blockedUsers$ = collectionData(q, { idField: 'blockId' }).pipe(
+      switchMap(blocks => {
+        if (blocks.length === 0) return of([]);
+
+        const userQueries = blocks.map(async (b: any) => {
+          const userSnap = await getDoc(doc(this.firestore, `users/${b.blockedUid}`));
+          return {
+            blockId: b.blockId,
+            name: userSnap.exists() ? userSnap.data()['fullName'] : 'User tidak dikenal',
+            timestamp: b.timestamp
+          };
+        });
+
+        return from(Promise.all(userQueries));
+      })
+    );
+  }
+
+  async unblockUser(blockId: string) {
+    const alert = await this.alertCtrl.create({
+      header: 'Buka Blokir?',
+      message: 'User ini akan bisa kembali melihat profil dan mengajak barter.',
       buttons: [
         { text: 'Batal', role: 'cancel' },
         {
-          text: 'Simpan',
-          handler: (data) => {
-            // Sekarang mengirim 3 parameter: Nama, Bio, dan Skills
-            this.saveData(data.fullName, data.bio, data.skills);
+          text: 'Buka Blokir',
+          handler: async () => {
+            try {
+              await deleteDoc(doc(this.firestore, `blocks/${blockId}`));
+              this.showToast('Blokir telah dibuka.', 'success');
+            } catch (e) {
+              this.showToast('Gagal membuka blokir.', 'danger');
+            }
           }
         }
       ]
     });
     await alert.present();
+  }
+
+  // --- LOGIC EDIT PROFIL ---
+  editProfile(currentData: any) {
+    this.tempData = {
+      fullName: currentData.fullName,
+      bio: currentData.bio || '',
+      skills: currentData.skillsOffered ? currentData.skillsOffered.join(', ') : ''
+    };
+    this.isModalOpen = true; 
+  }
+
+  confirmSave() {
+    this.saveData(this.tempData.fullName, this.tempData.bio, this.tempData.skills);
+    this.isModalOpen = false; 
   }
 
   async saveData(newName: string, newBio: string, skillString: string) {
@@ -88,7 +235,6 @@ export class ProfilePage implements OnInit {
       if (user) {
         const userDocRef = doc(this.firestore, `users/${user.uid}`);
         
-        // 1. Logika pemrosesan skill
         const rawSkills = skillString
           ? skillString.split(/[ ,]+/).map(s => s.trim()).filter(s => s !== "")
           : [];
@@ -104,10 +250,9 @@ export class ProfilePage implements OnInit {
           }
         }
 
-        // 2. Update Firestore dengan field BIO
         await updateDoc(userDocRef, {
           fullName: newName,
-          bio: newBio, // Simpan Bio ke Firestore
+          bio: newBio, 
           skillsOffered: uniqueSkills
         });
 

@@ -2,33 +2,43 @@
   <ion-toolbar color="primary">
     <ion-title>Eksplor Skill</ion-title>
   </ion-toolbar>
-  <ion-toolbar color="primary">
+  <ion-toolbar color="primary" class="search-toolbar">
     <ion-searchbar
       placeholder="Cari Skill atau Nama..."
       (ionInput)="onSearchChange($event)"
       debounce="500"
       show-clear-button="always"
+      class="custom-searchbar"
     >
     </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding-top">
   <div *ngIf="(searchTerm$ | async) as term">
     <div *ngIf="term.length >= 2">
-      <ion-list-header><ion-label>Hasil Pencarian</ion-label></ion-list-header>
+      <ion-list-header>
+        <ion-label class="main-label">Hasil Pencarian untuk "{{ term }}"</ion-label>
+      </ion-list-header>
+      
       <ion-card
+        class="user-card"
         *ngFor="let user of searchResult$ | async"
         (click)="goToDetail(user)"
       >
         <ion-item lines="none">
-          <ion-avatar slot="start">
-            <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName" />
-          </ion-avatar>
+            <ion-avatar slot="start" class="large-avatar">
+              <img [src]="'https://ui-avatars.com/api/?color=fff&name=' + user.fullName" />
+            </ion-avatar>
           <ion-label>
             <h2>{{ user.fullName }}</h2>
-            <p>{{ user.skillsOffered?.join(', ') || 'Belum ada skill' }}</p>
+            <div class="skill-tags">
+              <span *ngFor="let skill of user.skillsOffered.slice(0,3)" class="badge-skill">
+                {{ skill }}
+              </span>
+            </div>
           </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
         </ion-item>
       </ion-card>
     </div>
@@ -36,41 +46,47 @@
 
   <div *ngIf="!(searchTerm$ | async)">
     
-    <div *ngIf="recentUsers.length > 0">
+    <div *ngIf="recentUsers.length > 0" class="history-section">
       <ion-list-header>
-        <ion-label>Terakhir Dilihat</ion-label>
-        <ion-button fill="clear" size="small" color="danger" (click)="clearHistory()">
+        <ion-label class="main-label">Terakhir Dilihat</ion-label>
+        <ion-button fill="clear" size="small" color="danger" (click)="clearHistory()" class="btn-clear">
           Hapus
         </ion-button>
       </ion-list-header>
       
-      <div class="horizontal-scroll-container ion-padding-start">
+      <div class="horizontal-scroll-container">
         <div class="history-item" *ngFor="let user of recentUsers" (click)="goToDetail(user)">
-          <ion-avatar>
-            <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName" />
-          </ion-avatar>
-          <small>{{ user.fullName.split(' ')[0] }}</small>
+          <div class="avatar-wrapper">
+            <img [src]="'https://ui-avatars.com/api/?background=random&name=' + user.fullName" />
+          </div>
+          <p>{{ user.fullName.split(' ')[0] }}</p>
         </div>
       </div>
     </div>
 
-    <ion-list-header>
-      <ion-label>Rekomendasi Partner</ion-label>
+    <ion-list-header class="ion-margin-top">
+      <ion-label class="main-label">Rekomendasi Partner</ion-label>
     </ion-list-header>
     
     <ion-card
+      class="user-card recommend-card"
       *ngFor="let user of recommendedUsers$ | async"
       (click)="goToDetail(user)"
     >
       <ion-item lines="none">
-        <ion-avatar slot="start">
-          <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName" />
-        </ion-avatar>
+          <ion-avatar slot="start" class="large-avatar">
+            <img [src]="'https://ui-avatars.com/api/?color=fff&name=' + user.fullName" />
+          </ion-avatar>
         <ion-label>
-          <h2 style="font-weight: bold">{{ user.fullName }}</h2>
-          <ion-note>{{ user.skillsOffered?.slice(0,2)?.join(', ') }}...</ion-note>
+          <h2>{{ user.fullName }}</h2>
+          <p class="skills-preview">
+            <ion-icon name="book-outline"></ion-icon>
+            {{ user.skillsOffered.slice(0,2).join(', ') }}...
+          </p>
         </ion-label>
-        <ion-button fill="clear" slot="end">Lihat</ion-button>
+        <ion-button fill="solid" size="small" color="primary" class="btn-view" slot="end">
+          Lihat
+        </ion-button>
       </ion-item>
     </ion-card>
   </div>

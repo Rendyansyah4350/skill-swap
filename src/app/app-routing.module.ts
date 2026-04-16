@@ -41,6 +41,10 @@ const routes: Routes = [
     path: 'profile-view',
     loadChildren: () => import('./auth/profile-view/profile-view.module').then( m => m.ProfileViewPageModule)
   },
+  {
+    path: 'forgot-password',
+    loadChildren: () => import('./auth/forgot-password/forgot-password.module').then( m => m.ForgotPasswordPageModule)
+  },
   // Jalur 'home' dihapus dari sini karena sudah dipindah ke tabs-routing.module.ts
 ];
 

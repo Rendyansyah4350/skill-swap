@@ -10,51 +10,167 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <div class="bg-decoration"></div>
+
   <ng-container *ngIf="user$ | async as user; else loading">
     
-    <div class="ion-text-center ion-padding-vertical">
-      <ion-avatar style="width: 110px; height: 110px; margin: 0 auto; border: 3px solid var(--ion-color-primary); padding: 3px;">
-        <img [src]="'https://ui-avatars.com/api/?background=random&name=' + user.fullName + '&size=200'" />
+    <div class="ion-text-center ion-padding-vertical profile-top">
+      <ion-avatar class="main-avatar">
+        <img [src]="'https://ui-avatars.com/api/?name=' + user.fullName + '&size=200&color=fff'" />
       </ion-avatar>
       
-      <h2 style="font-weight: 800; margin-top: 15px; margin-bottom: 5px;">{{ user.fullName }}</h2>
+      <h2 class="user-name">{{ user.fullName }}</h2>
+
+      <div class="rating-badge" style="margin-bottom: 10px;">
+        <ion-icon name="star" color="warning"></ion-icon>
+        <span style="font-weight: bold; font-size: 1.1em; margin-left: 5px;">{{ averageRating }}</span>
+        <span style="color: #666; font-size: 0.9em; margin-left: 4px;">({{ totalReviews }} Ulasan)</span>
+      </div>
       
-      <p style="color: #666; font-style: italic; font-size: 0.95rem; margin: 0 20px 15px 20px;">
+      <p class="user-bio">
         "{{ user.bio || 'Belum ada bio. Tambahkan bio agar partner barter mengenalmu!' }}"
       </p>
 
-      <ion-button (click)="editProfile(user)" fill="outline" shape="round" size="small">
-        <ion-icon name="create-outline" slot="start"></ion-icon>
-        Edit ProfilSS
-      </ion-button>
+      <div class="ion-margin-top">
+        <ion-button (click)="editProfile(user)" fill="outline" shape="round" size="small" class="btn-edit">
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          Edit Profil
+        </ion-button>
+
+        <ion-button (click)="openBlockedList()" fill="clear" color="danger" size="small">
+          <ion-icon name="ban-outline" slot="start"></ion-icon>
+          Daftar Blokir
+        </ion-button>
+
+        <ion-button (click)="confirmDeleteAccount()" fill="clear" color="danger" size="small">
+          <ion-icon name="trash-outline" slot="start"></ion-icon>
+          Hapus Akun
+        </ion-button>
+      </div>
     </div>
 
-    <div style="height: 1px; background: #e0e0e0; margin: 20px 0;"></div>
+    <div class="divider"></div>
 
-    <ion-card class="ion-no-margin" style="border-radius: 15px; box-shadow: none; border: 1px solid #eee;">
+    <ion-card class="skill-card ion-no-margin ion-margin-bottom">
       <ion-card-header>
-        <ion-card-title style="font-size: 1rem; font-weight: bold;">Skill yang Saya Tawarkan</ion-card-title>
+        <ion-card-title>
+          <ion-icon name="ribbon-outline" color="primary"></ion-icon>
+          Skill yang Saya Tawarkan
+        </ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <div class="chips-grid">
           <ion-chip color="primary" mode="ios" *ngFor="let skill of user.skillsOffered">
-            <ion-icon name="ribbon-outline"></ion-icon>
-            <ion-label style="font-weight: 600;">{{ skill }}</ion-label>
+            <ion-icon name="star-outline"></ion-icon>
+            <ion-label>{{ skill }}</ion-label>
           </ion-chip>
           
-          <p *ngIf="!user.skillsOffered || user.skillsOffered.length === 0" style="color: gray;">
+          <p *ngIf="!user.skillsOffered || user.skillsOffered.length === 0" class="empty-text">
             Belum ada skill yang ditambahkan.
           </p>
         </div>
       </ion-card-content>
     </ion-card>
 
+    <div class="section-title ion-margin-top" style="padding-left: 10px; margin-bottom: 10px;">
+      <h3 style="font-size: 1.1em; font-weight: bold; color: #444;">Apa Kata Mereka:</h3>
+    </div>
+
+    <div *ngIf="myReviews$ | async as reviews">
+      <div *ngIf="reviews.length === 0" class="ion-text-center ion-padding" style="color: #999;">
+        <p>Belum ada ulasan masuk.</p>
+      </div>
+      
+      <ion-card class="review-card ion-no-margin ion-margin-bottom" *ngFor="let r of reviews" style="box-shadow: none; border: 1px solid #f0f0f0; border-radius: 12px;">
+        <ion-item lines="none">
+          <ion-label>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #f1c40f; font-weight: bold;">⭐ {{ r.rating }}</span>
+              <small style="color: #999;">{{ r.timestamp?.toDate() | date:'dd/MM/yy' }}</small>
+            </div>
+            <p style="font-style: italic; color: #555; margin-top: 5px; white-space: normal;">"{{ r.comment }}"</p>
+          </ion-label>
+        </ion-item>
+      </ion-card>
+    </div>
+
   </ng-container>
 
   <ng-template #loading>
-    <div class="ion-text-center" style="margin-top: 50px;">
+    <div class="sync-loader">
       <ion-spinner name="crescent" color="primary"></ion-spinner>
       <p>Memuat profil...</p>
     </div>
   </ng-template>
 </ion-content>
+
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="isModalOpen = false" [initialBreakpoint]="0.75" [breakpoints]="[0, 0.5, 0.75, 1]">
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>Edit Profil & Skill</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="isModalOpen = false" color="medium">Batal</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <div class="edit-form">
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="stacked">Nama Lengkap</ion-label>
+          <ion-input type="text" [(ngModel)]="tempData.fullName" placeholder="Masukkan nama lengkap"></ion-input>
+        </ion-item>
+
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="stacked">Bio Singkat</ion-label>
+          <ion-textarea [(ngModel)]="tempData.bio" placeholder="Tulis sedikit tentang dirimu..." [autoGrow]="true"></ion-textarea>
+        </ion-item>
+
+        <ion-item lines="none" class="custom-input">
+          <ion-label position="stacked">Skill</ion-label>
+          <ion-textarea [(ngModel)]="tempData.skills" placeholder="Contoh: Coding, Masak, Desain" [autoGrow]="true"></ion-textarea>
+        </ion-item>
+
+        <ion-button expand="block" shape="round" class="btn-save ion-margin-top" (click)="confirmSave()">
+          Simpan Perubahan
+        </ion-button>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="isBlockModalOpen" (didDismiss)="isBlockModalOpen = false">
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar color="primary">
+        <ion-title>User yang Diblokir</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="isBlockModalOpen = false">Tutup</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    
+    <ion-content class="ion-padding">
+      <ion-list lines="full">
+        <div *ngIf="(blockedUsers$ | async)?.length === 0" class="ion-text-center ion-padding">
+          <ion-icon name="people-outline" style="font-size: 48px; color: #ccc;"></ion-icon>
+          <p style="color: #888;">Tidak ada user yang diblokir.</p>
+        </div>
+
+        <ion-item *ngFor="let user of blockedUsers$ | async">
+          <ion-avatar slot="start">
+            <img [src]="'https://ui-avatars.com/api/?name=' + user.name + '&color=fff'" />
+          </ion-avatar>
+          <ion-label>
+            <h2 style="font-weight: bold;">{{ user.name }}</h2>
+            <p>Diblokir pada: {{ user.timestamp?.toDate() | date:'dd MMM yyyy' }}</p>
+          </ion-label>
+          <ion-button slot="end" fill="outline" color="success" (click)="unblockUser(user.blockId)">
+            Buka
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>

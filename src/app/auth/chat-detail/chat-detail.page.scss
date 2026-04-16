@@ -1,132 +1,188 @@
+// Container untuk Empty State (Belum ada pesan)
 #container {
   text-align: center;
-
   position: absolute;
   left: 0;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
+
+  strong {
+    font-size: 20px;
+    line-height: 26px;
+    color: #444;
+  }
+
+  p {
+    font-size: 16px;
+    line-height: 22px;
+    color: #8c8c8c;
+    margin: 0;
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+// Layout Utama Chat
+ion-content {
+  --background: #f0f2f5; // Background abu-abu muda ala aplikasi chat premium
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+.chat-content {
+  padding-bottom: 20px;
 }
 
-#container a {
-  text-decoration: none;
-}
-
+// Styling Bubble Chat
 .message-wrapper {
   display: flex;
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 12px; // Kasih jarak antar bubble biar lega
 
   .message-bubble {
+    max-width: 80%;
     padding: 10px 14px;
-    border-radius: 18px;
-    max-width: 75%;
-    font-size: 15px;
-    line-height: 1.4;
-  }
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    word-wrap: break-word;
 
-  &.sent {
-    justify-content: flex-end;
-    .message-bubble {
-      background: var(--ion-color-primary);
-      color: white;
-      border-bottom-right-radius: 2px;
+    .message-text {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      margin-bottom: 2px;
+    }
+
+    .message-info {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-top: 4px;
+
+      .time {
+        font-size: 0.65rem;
+        font-weight: 500;
+      }
+
+      ion-icon {
+        font-size: 0.9rem;
+      }
     }
   }
 
+  // Pesan yang KITA KIRIM (Kanan)
+  &.sent {
+    justify-content: flex-end;
+    .message-bubble {
+      background: #ffffff; // Putih bersih
+      border-radius: 18px 18px 4px 18px;
+      border: 1px solid #e0e0e0;
+
+      .message-text { color: #1a1a1a; } // Teks hitam pekat biar kebaca
+      .time { color: #888 !important; }
+    }
+  }
+
+  // Pesan yang KITA TERIMA (Kiri)
   &.received {
     justify-content: flex-start;
     .message-bubble {
-      background: #e9e9eb;
-      color: black;
-      border-bottom-left-radius: 2px;
+      background: linear-gradient(135deg, var(--ion-color-primary) 0%, #6366f1 100%);
+      color: white; // Teks putih di atas background biru gradasi
+      border-radius: 18px 18px 18px 4px;
+
+      .message-text { color: #ffffff !important; }
+      .time { color: rgba(255, 255, 255, 0.8) !important; }
+      .message-info ion-icon { color: white; }
     }
   }
 }
 
+// Input Chat di Bagian Bawah
 ion-footer {
-  padding: 5px;
+  background: white;
+  padding: 8px 10px;
+  border-top: 1px solid #eee;
+
   ion-toolbar {
-    --padding-top: 0;
-    --padding-bottom: 0;
+    --background: transparent;
+    --border-width: 0;
+    --min-height: 45px;
+  }
+
+  ion-item {
+    --background: #f4f5f8;
+    --border-radius: 25px;
+    --padding-start: 15px;
+    --inner-padding-end: 5px;
+    box-shadow: none;
+    margin-bottom: 0;
+  }
+
+  .custom-input {
+    font-weight: 500;
+    font-size: 0.95rem;
+    --placeholder-color: #abb4bd;
   }
 }
 
-.message-wrapper {
-  display: flex;
-  margin-bottom: 10px;
-
-  &.sent {
-    justify-content: flex-end;
-    .message-bubble {
-      background: #a0a0a3; // Warna hijau kalem ala WA
-      border-radius: 12px 12px 0 12px;
+// FIX DARK MODE: Paksa tetap kebaca & tidak nabrak
+@media (prefers-color-scheme: dark) {
+  ion-content { --background: #f0f2f5 !important; }
+  
+  .message-wrapper {
+    &.sent .message-bubble {
+      background: #ffffff !important;
+      .message-text { color: #1a1a1a !important; }
+    }
+    
+    &.received .message-bubble {
+      background: linear-gradient(135deg, var(--ion-color-primary) 0%, #6366f1 100%) !important;
+      .message-text { color: #ffffff !important; }
     }
   }
 
-  &.received {
-    justify-content: flex-start;
-    .message-bubble {
-      background: #ffffff;
-      border: 1px solid #eee;
-      border-radius: 12px 12px 12px 0;
-    }
+  ion-footer {
+    background: white !important;
+    ion-item { --background: #f4f5f8 !important; }
+    .custom-input { --color: #1a1a1a !important; }
   }
+  
+  #container strong { color: #444 !important; }
 }
 
-.message-bubble {
-  max-width: 80%;
-  padding: 8px 12px;
-  position: relative;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-
-  .message-text {
-    font-size: 1rem;
-    color: #333; // Warna teks pesan biar jelas
-    margin-bottom: 2px;
-    word-wrap: break-word; // Biar teks panjang nggak balapan keluar bubble
+// Styling Action Sheet Hapus (Premium Look)
+::ng-deep .custom-delete-sheet {
+  --background: #ffffff;
+  --button-color: #333;
+  
+  .action-sheet-title {
+    font-weight: 800 !important;
+    color: #1a1a1a !important;
+    font-size: 1.1rem !important;
   }
 
-  .message-info {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 4px;
-    margin-top: 2px;
+  .action-sheet-sub-title {
+    font-size: 0.85rem !important;
+    color: #888 !important;
+  }
 
-    .time {
-      font-size: 0.65rem;
-      color: #666 !important; // Kita paksa warnanya agak gelap (abu-abu tua)
+  .action-sheet-button {
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    
+    // Ikon di dalam tombol
+    .action-sheet-icon {
+      color: var(--ion-color-primary);
+      margin-right: 12px;
     }
 
-    ion-icon {
-      font-size: 0.9rem;
+    // Warna khusus untuk tombol destruktif (merah)
+    &.action-sheet-destructive {
+      color: #eb445a !important;
+      .action-sheet-icon { color: #eb445a !important; }
     }
   }
-}
 
-// Tambahan khusus untuk bubble partner (received) biar lebih jelas
-.message-wrapper.received {
-  .message-bubble {
-    background: #ffffff;
-    border: 1px solid #f0f0f0;
-
-    .time {
-      color: #999; // Jam di bubble putih agak abu-abu
-    }
+  // Khusus Dark Mode agar tetap sinkron
+  @media (prefers-color-scheme: dark) {
+    --background: #ffffff !important; // Tetap putih agar bersih
   }
 }

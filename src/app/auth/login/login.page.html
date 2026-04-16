@@ -11,12 +11,11 @@
         <div class="logo-wrapper">
           <img
             alt="SkillSwap Logo"
-            src="assets/icon/favicon.png"
-            style="width: 80px; height: auto;"
+            src="../../../assets/icon/Skill.png"
+            style="width: 50%; height: auto"
           />
         </div>
         <ion-card-header>
-          <ion-card-title>SkillSwap</ion-card-title>
           <ion-card-subtitle>Masuk ke akun Anda</ion-card-subtitle>
         </ion-card-header>
       </div>
@@ -53,9 +52,23 @@
           Masuk
         </ion-button>
 
+        <div
+          class="ion-text-center"
+          style="margin-top: 10px; margin-bottom: 15px"
+        >
+          <ion-text
+            color="primary"
+            (click)="goToForgot()"
+            style="cursor: pointer; font-size: 0.9rem; font-weight: 600"
+          >
+            Lupa Password?
+          </ion-text>
+        </div>
+
         <div class="ion-text-center ion-margin-top">
-          <ion-note (click)="goToRegister()" style="cursor: pointer;">
-            Belum punya akun? <ion-text color="primary"><b>Daftar di sini</b></ion-text>
+          <ion-note (click)="goToRegister()" style="cursor: pointer">
+            Belum punya akun?
+            <ion-text color="primary"><b>Daftar di sini</b></ion-text>
           </ion-note>
         </div>
       </ion-card-content>

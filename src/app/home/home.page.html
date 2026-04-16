@@ -17,20 +17,26 @@
 
 <ion-content class="ion-padding">
   <ng-container *ngIf="user$ | async as userData; else loading">
-    
-    <div class="welcome-section ion-margin-bottom">
-      <h1 style="font-weight: 800; font-size: 1.8rem; margin-bottom: 5px;">
-        Hi, {{ userData.fullName }}!
-      </h1>
-      <ion-note>Siap untuk berbagi ilmu hari ini?</ion-note>
-    </div>
+    <ion-card class="welcome-card ion-no-margin ion-margin-bottom">
+      <ion-card-content>
+        <div class="welcome-text">
+          <h1>Hi, {{ userData.fullName }}!</h1>
+          <p>Siap untuk berbagi ilmu hari ini?</p>
+        </div>
+        <div class="welcome-icon">
+          <ion-icon name="sparkles-outline"></ion-icon>
+        </div>
+      </ion-card-content>
+    </ion-card>
 
     <div *ngIf="segment === 'chat'">
-      <p class="ion-padding-start" style="font-weight: bold;">Obrolan Aktif:</p>
-      
+      <p class="ion-padding-start" style="font-weight: bold">Obrolan Aktif:</p>
+
       <div *ngIf="(acceptedChats$ | async)?.length === 0" class="ion-text-center ion-padding">
-        <ion-icon name="chatbubble-ellipses-outline" style="font-size: 3rem; color: #ccc;"></ion-icon>
-        <p color="medium">Belum ada chat aktif.<br><small>Terima ajakan barter untuk mulai chat.</small></p>
+        <ion-icon name="chatbubble-ellipses-outline" style="font-size: 3rem; color: #ccc"></ion-icon>
+        <p color="medium">
+          Belum ada chat aktif.<br /><small>Terima ajakan barter untuk mulai chat.</small>
+        </p>
       </div>
 
       <ion-list lines="full">
@@ -39,47 +45,64 @@
             <img [src]="'https://ui-avatars.com/api/?background=random&name=' + chat.partnerName" />
           </ion-avatar>
           <ion-label>
-            <h2 style="font-weight: bold;">{{ chat.partnerName }}</h2>
-            <p>Klik untuk lanjut diskusi...</p>
+            <h2 style="font-weight: bold">{{ chat.partnerName }}</h2>
+            <div style="color: orange; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+              <ion-icon name="star"></ion-icon> {{ userRatings[chat.partnerId] || '0.0' }}
+            </div>
+            <p style="font-size: 0.85rem; color: #666">Ketuk Untuk masuk Chat</p>
           </ion-label>
-          <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+
+          <ion-badge color="danger" slot="end" *ngIf="unreadCounts[chat.partnerId] > 0">
+            {{ unreadCounts[chat.partnerId] }}
+          </ion-badge>
+
+          <ion-icon *ngIf="!unreadCounts[chat.partnerId] || unreadCounts[chat.partnerId] === 0" name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
         </ion-item>
       </ion-list>
     </div>
 
     <div *ngIf="segment === 'request'">
-      
-      <p class="ion-padding-start" style="font-weight: bold; color: var(--ion-color-primary);">Permintaan Saya:</p>
+      <p class="ion-padding-start" style="font-weight: bold; color: var(--ion-color-primary)">Permintaan Saya:</p>
       <div *ngIf="(outgoingRequests$ | async)?.length === 0" class="ion-padding-start">
-        <p style="font-size: 0.9rem; color: gray;">Kamu belum mengirim permintaan.</p>
+        <p style="font-size: 0.9rem; color: gray">Kamu belum mengirim permintaan.</p>
       </div>
 
       <ion-card *ngFor="let group of outgoingRequests$ | async" class="ion-margin-bottom">
         <ion-item lines="none">
-          <ion-avatar slot="start" style="width: 30px; height: 30px;">
+          <ion-avatar slot="start" style="width: 30px; height: 30px">
             <img [src]="'https://ui-avatars.com/api/?name=' + group.partnerName" />
           </ion-avatar>
           <ion-label>
-            <h3 style="font-weight: bold;">Ke: {{ group.partnerName }}</h3>
+            <h3 style="font-weight: bold">Ke: {{ group.partnerName }}</h3>
+            <p style="color: orange; font-size: 0.75rem;">
+              <ion-icon name="star"></ion-icon> {{ userRatings[group.partnerId] || '0.0' }}
+            </p>
           </ion-label>
         </ion-item>
-        <ion-card-content style="padding-top: 0;">
-          <div *ngFor="let s of group.skills" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+        <ion-card-content style="padding-top: 0">
+          <div *ngFor="let s of group.skills" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px">
             <ion-badge [color]="s.status === 'pending' ? 'warning' : 'danger'" mode="ios">
               {{ s.name }} ({{ s.status }})
             </ion-badge>
-            <ion-button *ngIf="s.status === 'rejected'" fill="clear" color="medium" size="small" (click)="deleteRequest(s.id)">
-              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-            </ion-button>
+            
+            <div style="display: flex; gap: 5px;">
+              <ion-button *ngIf="s.status === 'pending'" fill="clear" color="danger" size="small" (click)="cancelRequest(s.id)">
+                <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+              
+              <ion-button *ngIf="s.status === 'rejected'" fill="clear" color="medium" size="small" (click)="deleteRequest(s.id)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
           </div>
         </ion-card-content>
       </ion-card>
 
-      <hr style="opacity: 0.1; margin: 20px 0;">
+      <hr style="opacity: 0.1; margin: 20px 0" />
 
-      <p class="ion-padding-start" style="font-weight: bold; color: var(--ion-color-success);">Permintaan Masuk:</p>
+      <p class="ion-padding-start" style="font-weight: bold; color: var(--ion-color-success)">Permintaan Masuk:</p>
       <div *ngIf="(incomingRequests$ | async)?.length === 0" class="ion-padding-start">
-        <p style="font-size: 0.9rem; color: gray;">Belum ada permintaan dari orang lain.</p>
+        <p style="font-size: 0.9rem; color: gray">Belum ada permintaan dari orang lain.</p>
       </div>
 
       <ion-card *ngFor="let group of incomingRequests$ | async" class="ion-margin-bottom">
@@ -88,23 +111,25 @@
             <img [src]="'https://ui-avatars.com/api/?name=' + group.partnerName" />
           </ion-avatar>
           <ion-label>
-            <h2 style="font-weight: bold;">{{ group.partnerName }}</h2>
-            <p>Mengirim Permintaan</p>
+            <h2 style="font-weight: bold">{{ group.partnerName }}</h2>
+            <p style="color: orange; font-size: 0.75rem;">
+              <ion-icon name="star"></ion-icon> {{ userRatings[group.partnerId] || '0.0' }}
+            </p>
           </ion-label>
         </ion-item>
 
         <ion-list lines="none">
           <ion-item *ngFor="let s of group.skills">
             <ion-label>
-              <h3 style="font-weight: 600;">{{ s.name }}</h3>
+              <h3 style="font-weight: 600">{{ s.name }}</h3>
               <p *ngIf="s.status === 'rejected'" color="danger">Ditolak</p>
             </ion-label>
-            
+
             <div slot="end" *ngIf="s.status === 'pending'">
               <ion-button fill="clear" color="danger" (click)="updateStatus(s.id, 'rejected')">
                 <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
               </ion-button>
-              <ion-button fill="solid" color="success" (click)="updateStatus(s.id, 'accepted')" style="--border-radius: 8px;">
+              <ion-button fill="solid" color="success" (click)="updateStatus(s.id, 'accepted')" style="--border-radius: 8px">
                 <ion-icon name="checkmark-outline" slot="start"></ion-icon>
                 Accept
               </ion-button>
@@ -117,11 +142,50 @@
         </ion-list>
       </ion-card>
 
+      <hr style="opacity: 0.1; margin: 20px 0" />
+      <p class="ion-padding-start" style="font-weight: bold; color: #3dc2ff">Partner Saya:</p>
+
+      <div *ngIf="(acceptedChats$ | async) as partners; else loadingPartners">
+        <div *ngIf="partners.length === 0" class="ion-padding-start">
+          <p style="font-size: 0.9rem; color: gray">Belum ada partner yang terhubung.</p>
+        </div>
+
+        <ion-card *ngFor="let p of partners" style="margin-bottom: 15px; border-radius: 12px; border: 1px solid #f0f0f0">
+          <ion-item lines="none">
+            <ion-avatar slot="start">
+              <img [src]="'https://ui-avatars.com/api/?background=random&name=' + p.partnerName" />
+            </ion-avatar>
+            <ion-label>
+              <h2 style="font-weight: bold">{{ p.partnerName }}</h2>
+              <div style="color: orange; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
+                <ion-icon name="star"></ion-icon> {{ userRatings[p.partnerId] || '0.0' }}
+              </div>
+              <p>Partner Swap: {{ p.lastSkill }}</p>
+            </ion-label>
+            <ion-button slot="end" fill="clear" color="danger" (click)="confirmDeletePartner(p.partnerId, p.partnerName)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-item>
+
+          <ion-card-content style="padding: 0 16px 16px 16px; display: flex; justify-content: flex-end; gap: 8px">
+            <ion-button fill="outline" size="small" (click)="goToPartnerProfile(p.partnerId)" style="--border-radius: 8px">
+              <ion-icon name="person-outline" slot="start"></ion-icon> Profil
+            </ion-button>
+            <ion-button fill="solid" size="small" (click)="openChat(p.partnerId, p.partnerName)" style="--border-radius: 8px">
+              <ion-icon name="chatbubble-ellipses-outline" slot="start"></ion-icon> Chat
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <ng-template #loadingPartners>
+        <ion-spinner name="dots" class="ion-margin-start"></ion-spinner>
+      </ng-template>
     </div>
   </ng-container>
 
   <ng-template #loading>
-    <div class="ion-text-center ion-padding" style="margin-top: 50px;">
+    <div class="ion-text-center ion-padding" style="margin-top: 50px">
       <ion-spinner name="crescent" color="primary"></ion-spinner>
       <p>Sinkronisasi data...</p>
     </div>

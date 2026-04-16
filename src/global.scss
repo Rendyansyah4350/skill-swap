@@ -34,4 +34,79 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+// @import "@ionic/angular/css/palettes/dark.system.css";
+
+/* Gaya Popup Keluar */
+.custom-exit-alert {
+  --background: #ffffff;
+  
+  .alert-title {
+    color: var(--ion-color-primary);
+    font-weight: bold;
+  }
+
+  .alert-message {
+    color: #444;
+  }
+
+  button.alert-button.secondary {
+    color: #666; /* Warna tombol Batal */
+  }
+
+  button.alert-button:not(.secondary) {
+    color: var(--ion-color-danger); /* Warna tombol Keluar jadi merah */
+    font-weight: bold;
+  }
+}
+
+/* Styling Popup Hapus Akun yang Lebih Bagus */
+.danger-alert {
+  --background: #ffffff;
+  --border-radius: 20px;
+
+  .alert-wrapper {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+  }
+
+  .alert-head {
+    padding-bottom: 8px;
+    text-align: center;
+    
+    .alert-title {
+      color: #e74c3c; // Warna merah tegas
+      font-weight: 800;
+      font-size: 1.3rem;
+    }
+  }
+
+  .alert-message {
+    text-align: center;
+    color: #555;
+    font-size: 0.95rem;
+    padding-bottom: 20px;
+  }
+
+  .alert-button-group {
+    padding: 10px;
+    justify-content: space-around;
+  }
+
+  /* Tombol Batal */
+  .alert-button-cancel {
+    color: #888 !important;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* Tombol Konfirmasi Hapus */
+  .alert-button-confirm {
+    background: #e74c3c !important;
+    color: #ffffff !important;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+  }
+}
